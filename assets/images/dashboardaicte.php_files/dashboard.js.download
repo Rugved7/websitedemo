@@ -1,0 +1,220 @@
+
+
+
+$('.select').multipleSelect({
+	
+	 selectAll: true,
+	 filter: true,
+	 
+ });
+  $('.singleselect').multipleSelect({
+	 
+	single: true	
+	 
+ });
+ 
+ 
+ 
+  $('#level').multipleSelect("checkAll");
+  $('#program').multipleSelect("checkAll");
+ $('#state').multipleSelect("checkAll");
+	$('#institutiontype').multipleSelect("checkAll");
+     
+	   
+
+$("#loaded").click(function() {
+    var $btn = $(this);
+    document.getElementById("loaded").innerHTML="Loading...";
+    // Then whatever you actually want to do i.e. submit form
+    // After that has finished, reset the button state using
+    setTimeout(function () {
+        document.getElementById("loaded").innerHTML="Submit";
+    }, 3000);
+});
+
+ 
+  var app= angular.module('aicte', ['countTo','ngLoadingSpinner']).controller('AppCtrl', function($scope, $http, $timeout) {
+	      $timeout(function () {
+      document.getElementById("myDiv1").style.display = "block";
+  }, 3000);
+  $scope.submit = function () {	
+$scope.year = document.getElementById('year').value;
+levelselect=$("#level").multipleSelect("getSelects");
+programselect=$("#program").multipleSelect("getSelects");
+stateselect=$("#state").multipleSelect("getSelects");
+insttypeselect=$("#institutiontype").multipleSelect("getSelects");
+var Women = document.getElementById('Women').value;
+var Minority = document.getElementById('Minority').value;
+var year = document.getElementById('year').value;
+
+//Set up for Printing Title
+ 
+   var year_s = ["2012-2013", "2013-2014", "2014-2015" ,"2015-2016","2016-2017","2017-2018","2018-2019","2019-2020","2020-2021","2021-2022"];
+   var years = year_s[year],programs="",levels="",institutiontypes="",Womens="",states="",Minoritys="";
+var titles;
+
+if(stateselect.length<36)
+{
+	states='`'+stateselect+'`';
+}
+if(insttypeselect.length<4)
+{
+	institutiontypes='`'+insttypeselect+'`';
+}
+if(levelselect.length<3)
+{
+	levels='`'+levelselect+'`';
+}
+if(programselect.length<12)
+{
+	programs='`'+programselect+'`';
+}
+if(Women=='Y')
+{
+	Womens="`Women`";
+}
+if(Minority=='Y')
+{
+	Minoritys="`Minority`";
+}
+
+
+
+// Create an AppML object and fetch the data
+if(insttypeselect!="" || levelselect!="" || stateselect!="" || programselect!="")
+{
+	
+var link= "php/dashboardserver.php?year="+year+"&institutiontype="+insttypeselect+"&level="+levelselect+"&program="+programselect+"&state="+stateselect+"&Minority="+Minority+"&Women="+Women;
+//console.log(link);
+$http.get(link).then(function(response) {$scope.myArr = response.data.records;
+
+//Clearing Old Chart
+document.getElementById("institute").innerHTML = "";
+document.getElementById("container").innerHTML = "";
+//Printing Pie Chart
+Morris.Donut({
+  element: 'institute',
+  data: [
+    
+    {label: "Institute 2012-2013", value: $scope.myArr.instituecount[0]},
+    {label: "Institute 2013-2014", value: $scope.myArr.instituecount[1]},
+    {label: "Institute 2014-2015", value: $scope.myArr.instituecount[2]},
+	{label: "Institute 2015-2016", value: $scope.myArr.instituecount[3]},
+	{label: "Institute 2016-2017", value: $scope.myArr.instituecount[4]},
+	{label: "Institute 2017-2018", value: $scope.myArr.instituecount[5]},
+	{label: "Institute 2018-2019", value: $scope.myArr.instituecount[6]},
+	{label: "Institute 2019-2020", value: $scope.myArr.instituecount[7]},
+    {label: "Institute 2020-2021", value: $scope.myArr.instituecount[8]},
+    {label: "Institute 2021-2022", value: $scope.myArr.instituecount[9]},
+  ]
+});
+
+//Printing 3d Chart
+$(function () {
+    var chart = new Highcharts.Chart({
+        chart: {
+			renderTo: 'container',
+            type: 'column',
+            margin: 90,
+            options3d: {
+                enabled: true,
+                alpha: 10,
+                beta: 25,
+                depth: 220,
+				 viewDistance: 25
+            }
+        },
+        title: {
+            text: ''
+        },
+		 legend: {
+            
+            verticalAlign: 'right',
+            layout: 'horizontal',
+            x: 0,
+            y: 0
+        },
+        subtitle: {
+            text: ''
+        },
+        plotOptions: {
+            column: {
+                depth: 40,
+                stacking: true,
+                grouping: false,
+                groupZPadding: 10
+		}},
+        xAxis: {
+            categories: ["2012-2013","2013-2014","2014-2015","2015-2016","2016-2017","2017-2018","2018-2019","2019-2020","2020-2021","2021-2022"]},
+        yAxis: {
+            title: {
+                text: "Approved Intake/Enrollment"
+            }
+        },
+        series: [{
+		  name: 'Placement',
+            data: [+$scope.myArr.placed[0],+$scope.myArr.placed[1],+$scope.myArr.placed[2],+$scope.myArr.placed[3],+$scope.myArr.placed[4],+$scope.myArr.placed[5],+$scope.myArr.placed[6],+$scope.myArr.placed[7],+$scope.myArr.placed[8],+$scope.myArr.placed[9]],
+            stack: 0
+        },{
+		  name: 'Students Passed',
+            data: [+$scope.myArr.passed[0],+$scope.myArr.passed[1],+$scope.myArr.passed[2],+$scope.myArr.passed[3],+$scope.myArr.passed[4],+$scope.myArr.passed[5],+$scope.myArr.passed[6],+$scope.myArr.passed[7],+$scope.myArr.passed[8],+$scope.myArr.passed[9]],
+            stack: 1
+        }
+	  , {
+		  name: 'Enrollment',
+            data: [+$scope.myArr.enrollment[0],+$scope.myArr.enrollment[1],+$scope.myArr.enrollment[2],+$scope.myArr.enrollment[3],+$scope.myArr.enrollment[4],+$scope.myArr.enrollment[5],+$scope.myArr.enrollment[6],+$scope.myArr.enrollment[7],+$scope.myArr.enrollment[8],+$scope.myArr.enrollment[9]],
+            stack: 2
+        },{
+			name: 'Intake',
+         data: [+$scope.myArr.intake[0],+$scope.myArr.intake[1],+$scope.myArr.intake[2],+$scope.myArr.intake[3],+$scope.myArr.intake[4],+$scope.myArr.intake[5],+$scope.myArr.intake[6],+$scope.myArr.intake[7],+$scope.myArr.intake[8],+$scope.myArr.intake[9]],
+         stack: 3
+      }]
+    });
+	
+    function showValues() {
+        $('#R0-value').html(chart.options.chart.options3d.alpha);
+        $('#R1-value').html(chart.options.chart.options3d.beta);
+    }
+
+    // Activate the sliders
+    $('#R0').on('change', function () {
+        chart.options.chart.options3d.alpha = this.value;
+        showValues();
+        chart.redraw(false);
+    });
+    $('#R1').on('change', function () {
+        chart.options.chart.options3d.beta = this.value;
+        showValues();
+        chart.redraw(false);
+    });
+
+    showValues();
+	
+});
+
+				
+            });
+
+//Printing Title
+if(stateselect.length == 36 && levelselect.length == 3 && programselect.length == 9 && Minority == '1' && Women == '1' && insttypeselect.length == 4 )
+{
+	document.getElementById("titles").innerHTML = "AICTE Approved Institutes for the Academic Year: "+years;
+}
+else
+{
+	document.getElementById("titles").innerHTML = "AICTE Approved Institutes for the Academic Year: "+years+" - "+states+programs+levels+institutiontypes+Womens+Minoritys;
+}
+
+
+
+
+
+}
+
+	   
+  }
+  
+  
+  
+});
+
